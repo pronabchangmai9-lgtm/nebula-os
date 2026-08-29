@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NEBULA OS // 2099</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --cyan:#54f7ff;
+  --purple:#9d6cff;
+  --pink:#ff4fbd;
+  --green:#61ffad;
+  --red:#ff5577;
+  --yellow:#ffe27a;
+
+  --bg:#02030a;
+  --glass:rgba(7,10,24,.72);
+  --glass2:rgba(15,19,39,.82);
+  --border:rgba(255,255,255,.11);
+
+  --text:#f5f7ff;
+  --muted:#727c95;
+
+  --shadow:
+    0 25px 90px rgba(0,0,0,.55),
+    inset 0 1px rgba(255,255,255,.04);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,sans-serif;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+#space{
+  position:fixed;
+  inset:0;
+  z-index:0;
+}
+
+.aurora{
+  position:fixed;
+  z-index:1;
+  width:600px;
+  height:600px;
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  filter:blur(120px);
+  opacity:.12;
+  background:radial-gradient(circle,var(--purple),transparent 65%);
+  transition:.25s;
+}
+
+.noise{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  pointer-events:none;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ================= BOOT ================= */
+
+#boot{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:#010207;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  transition:1s;
+}
+
+.boot-inner{
+  width:min(620px,85%);
+  font:12px "Space Mono";
+  color:#6f7a91;
+}
+
+.boot-logo{
+  font-size:42px;
+  letter-spacing:9px;
+  color:white;
+  margin-bottom:8px;
+  text-shadow:0 0 30px var(--cyan);
+}
+
+.boot-sub{
+  color:var(--cyan);
+  margin-bottom:35px;
+}
+
+.boot-lines{
+  height:130px;
+  line-height:1.8;
+}
+
+.boot-line{
+  animation:bootLine .3s forwards;
+}
+
+.boot-bar{
+  height:3px;
+  background:#161a29;
+  overflow:hidden;
+  margin-top:18px;
+}
+
+.boot-progress{
+  width:0;
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));
+  box-shadow:0 0 15px var(--cyan);
+  animation:bootProgress 3.4s forwards;
+}
+
+@keyframes bootLine{
+  from{opacity:0;transform:translateX(-8px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes bootProgress{
+  to{width:100%}
+}
+
+/* ================= DESKTOP ================= */
+
+#desktop{
+  position:relative;
+  z-index:5;
+  width:100%;
+  height:100%;
+  opacity:0;
+  transition:1s;
+}
+
+#desktop.ready{
+  opacity:1;
+}
+
+.topbar{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:46px;
+  padding:0 17px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  background:rgba(2,4,12,.55);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(18px);
+}
+
+.top-left,
+.top-right{
+  display:flex;
+  align-items:center;
+  gap:17px;
+}
+
+.nebula-mini{
+  font:700 11px "Space Mono";
+  letter-spacing:3px;
+  color:white;
+}
+
+.top-item{
+  font:9px "Space Mono";
+  color:#657088;
+}
+
+.top-item b{
+  color:var(--cyan);
+}
+
+#topClock{
+  color:#b7bfd0;
+}
+
+/* ================= DOCK ================= */
+
+.dock{
+  position:absolute;
+  left:50%;
+  bottom:19px;
+  transform:translateX(-50%);
+  z-index:900;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:8px;
+  border:1px solid var(--border);
+  background:rgba(7,9,20,.75);
+  backdrop-filter:blur(25px);
+
+  border-radius:18px;
+  box-shadow:var(--shadow);
+}
+
+.dock-app{
+  position:relative;
+  width:48px;
+  height:48px;
+  border:0;
+  border-radius:13px;
+  color:white;
+  background:rgba(255,255,255,.045);
+  font-size:21px;
+  transition:.25s;
+}
+
+.dock-app:hover{
+  transform:translateY(-9px) scale(1.08);
+  background:rgba(255,255,255,.10);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.4),
+    0 0 20px rgba(85,246,255,.12);
+}
+
+.dock-app.active::after{
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  left:50%;
+  transform:translateX(-50%);
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);
+}
+
+/* ================= DESKTOP ICON ================= */
+
+.desktop-icons{
+  position:absolute;
+  top:70px;
+  left:22px;
+  display:grid;
+  gap:18px;
+}
+
+.desktop-icon{
+  width:76px;
+  border:0;
+  background:transparent;
+  color:#b0b8c9;
+  text-align:center;
+  padding:7px;
+  border-radius:10px;
+}
+
+.desktop-icon:hover{
+  background:rgba(255,255,255,.06);
+  color:white;
+}
+
+.desktop-icon div{
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.desktop-icon span{
+  font-size:10px;
+}
+
+/* ================= WINDOWS ================= */
+
+.window{
+  position:absolute;
+  width:600px;
+  min-width:300px;
+  min-height:240px;
+
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--glass);
+  backdrop-filter:blur(25px);
+  box-shadow:var(--shadow);
+
+  overflow:hidden;
+
+  display:none;
+  flex-direction:column;
+
+  animation:windowOpen .25s ease;
+}
+
+.window.show{
+  display:flex;
+}
+
+.window.maximized{
+  left:15px!important;
+  top:58px!important;
+  width:calc(100% - 30px)!important;
+  height:calc(100% - 135px)!important;
+}
+
+.window-head{
+  height:43px;
+  flex:none;
+
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  padding:0 12px;
+
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.025);
+
+  cursor:grab;
+}
+
+.window-head:active{
+  cursor:grabbing;
+}
+
+.window-title{
+  flex:1;
+  font:10px "Space Mono";
+  letter-spacing:1px;
+  color:#a7afc0;
+}
+
+.window-buttons{
+  display:flex;
+  gap:6px;
+}
+
+.win-btn{
+  width:11px;
+  height:11px;
+  border:0;
+  border-radius:50%;
+  padding:0;
+}
+
+.win-close{background:#ff5577}
+.win-min{background:#ffd45e}
+.win-max{background:#5cffad}
+
+.window-content{
+  flex:1;
+  overflow:auto;
+  padding:20px;
+  scrollbar-width:thin;
+  scrollbar-color:#30364a transparent;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding-bottom:30px;
+}
+
+.core{
+  width:190px;
+  height:190px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  transition:.3s;
+}
+
+.core::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+
+  background:
+    radial-gradient(circle at 32% 27%,white 0 1%,transparent 4%),
+    radial-gradient(circle at 60% 60%,var(--purple),transparent 45%),
+    radial-gradient(circle at 42% 38%,var(--cyan),transparent 58%),
+    #0b1025;
+
+  box-shadow:
+    0 0 35px rgba(85,246,255,.55),
+    0 0 110px rgba(157,108,255,.25),
+    inset -25px -30px 60px #000;
+
+  animation:corePulse 4s ease-in-out infinite;
+}
+
+.core::after{
+  content:"";
+  position:absolute;
+  inset:-30px;
+  border-radius:50%;
+  border:1px solid rgba(85,246,255,.18);
+  border-left-color:transparent;
+  border-right-color:var(--purple);
+  animation:spinReverse 10s linear infinite;
+}
+
+.core-dot{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  position:relative;
+  z-index:2;
+
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.3);
+
+  box-shadow:0 0 30px rgba(85,246,255,.4);
+
+  display:grid;
+  place-items:center;
+}
+
+.core-dot::after{
+  content:"";
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:white;
+
+  box-shadow:
+    0 0 12px white,
+    0 0 35px var(--cyan),
+    0 0 65px var(--purple);
+}
+
+.hero h1{
+  margin-top:43px;
+  font-size:clamp(27px,4vw,48px);
+  letter-spacing:-2px;
+
+  background:linear-gradient(
+    90deg,
+    white,
+    var(--cyan),
+    var(--purple),
+    white
+  );
+
+  background-size:300%;
+  -webkit-background-clip:text;
+  color:transparent;
+
+  animation:gradient 7s linear infinite;
+}
+
+.hero p{
+  margin-top:10px;
+  color:#667089;
+  font:10px "Space Mono";
+  letter-spacing:2px;
+}
+
+.hero-status{
+  margin-top:23px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  color:#677188;
+  font:9px "Space Mono";
+}
+
+.green-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px var(--green);
+}
+
+/* ================= TERMINAL ================= */
+
+.terminal{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  background:rgba(0,0,0,.2);
+  border-radius:10px;
+  padding:15px;
+  font:11px "Space Mono";
+}
+
+.terminal-output{
+  flex:1;
+  overflow:auto;
+  line-height:1.8;
+  color:#8993a8;
+}
+
+.term-system{color:var(--cyan)}
+.term-good{color:var(--green)}
+.term-error{color:var(--red)}
+.term-warn{color:var(--yellow)}
+
+.terminal-input{
+  display:flex;
+  padding-top:12px;
+  margin-top:10px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+
+.terminal-input span{
+  color:var(--cyan);
+  margin-right:8px;
+}
+
+.terminal-input input{
+  flex:1;
+  background:none;
+  border:0;
+  outline:0;
+  color:white;
+  font:11px "Space Mono";
+}
+
+/* ================= AI ================= */
+
+.ai{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.ai-message{
+  max-width:82%;
+  padding:12px 14px;
+  border-radius:12px;
+  margin-bottom:10px;
+  font-size:11px;
+  line-height:1.6;
+}
+
+.ai-bot{
+  background:rgba(85,246,255,.055);
+  border-left:2px solid var(--cyan);
+  color:#9ca6b9;
+}
+
+.ai-user{
+  margin-left:auto;
+  background:rgba(157,108,255,.08);
+  border-right:2px solid var(--purple);
+  color:#c0c6d3;
+}
+
+.ai-input{
+  display:flex;
+  gap:8px;
+  margin-top:auto;
+}
+
+.ai-input input{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  outline:0;
+  color:white;
+  background:rgba(0,0,0,.25);
+}
+
+.send{
+  border:1px solid rgba(85,246,255,.2);
+  background:rgba(85,246,255,.08);
+  color:var(--cyan);
+  border-radius:10px;
+  padding:0 15px;
+}
+
+/* ================= FILES ================= */
+
+.files-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.file{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  border-radius:12px;
+  padding:17px;
+  transition:.2s;
+  cursor:pointer;
+}
+
+.file:hover{
+  transform:translateY(-3px);
+  border-color:rgba(85,246,255,.3);
+  background:rgba(85,246,255,.035);
+}
+
+.file-icon{
+  font-size:27px;
+  margin-bottom:10px;
+}
+
+.file-name{
+  font-size:11px;
+}
+
+.file-type{
+  margin-top:5px;
+  color:#596276;
+  font-size:9px;
+}
+
+/* ================= SYSTEM ================= */
+
+.system-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.stat{
+  padding:16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+}
+
+.stat-label{
+  color:#68728a;
+  font:9px "Space Mono";
+}
+
+.stat-value{
+  margin-top:8px;
+  font:20px "Space Mono";
+  color:white;
+}
+
+.progress{
+  height:4px;
+  margin-top:12px;
+  background:#171b2a;
+  border-radius:5px;
+  overflow:hidden;
+}
+
+.progress div{
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));
+  box-shadow:0 0 10px var(--cyan);
+}
+
+/* ================= MUSIC ================= */
+
+.music{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.album{
+  width:150px;
+  height:150px;
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 40% 30%,white,transparent 2%),
+    conic-gradient(
+      var(--cyan),
+      var(--purple),
+      var(--pink),
+      var(--cyan)
+    );
+  box-shadow:0 0 70px rgba(157,108,255,.3);
+  animation:spin 8s linear infinite;
+}
+
+.song{
+  margin-top:25px;
+  font-size:16px;
+  font-weight:600;
+}
+
+.artist{
+  color:#6c768d;
+  font-size:10px;
+  margin-top:5px;
+}
+
+.wave{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  height:55px;
+  margin:18px;
+}
+
+.wave i{
+  width:4px;
+  height:20px;
+  border-radius:5px;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+  animation:wave .7s ease-in-out infinite alternate;
+}
+
+.wave i:nth-child(2){animation-delay:.1s}
+.wave i:nth-child(3){animation-delay:.2s}
+.wave i:nth-child(4){animation-delay:.3s}
+.wave i:nth-child(5){animation-delay:.4s}
+.wave i:nth-child(6){animation-delay:.2s}
+.wave i:nth-child(7){animation-delay:.1s}
+
+/* ================= SETTINGS ================= */
+
+.settings-list{
+  display:grid;
+  gap:10px;
+}
+
+.setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+}
+
+.setting-name{
+  font-size:11px;
+}
+
+.setting-desc{
+  color:#626c82;
+  font-size:9px;
+  margin-top:4px;
+}
+
+.toggle{
+  width:42px;
+  height:23px;
+  border:0;
+  border-radius:20px;
+  background:#242938;
+  position:relative;
+}
+
+.toggle::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:17px;
+  height:17px;
+  border-radius:50%;
+  background:#727a8c;
+  transition:.2s;
+}
+
+.toggle.on{
+  background:rgba(85,246,255,.2);
+}
+
+.toggle.on::after{
+  left:22px;
+  background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);
+}
+
+/* ================= NOTIFICATIONS ================= */
+
+.notifications{
+  position:absolute;
+  right:18px;
+  top:62px;
+  z-index:950;
+
+  width:270px;
+
+  display:grid;
+  gap:8px;
+}
+
+.notification{
+  padding:13px;
+  border-radius:12px;
+  background:rgba(8,11,25,.84);
+  border:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  box-shadow:0 15px 40px rgba(0,0,0,.35);
+
+  animation:notifIn .3s ease;
+}
+
+.notification strong{
+  display:block;
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.notification span{
+  color:#6c768c;
+  font-size:9px;
+  line-height:1.5;
+}
+
+@keyframes notifIn{
+  from{opacity:0;transform:translateX(25px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+@keyframes spinReverse{
+  to{transform:rotate(-360deg)}
+}
+
+@keyframes gradient{
+  to{background-position:300%}
+}
+
+@keyframes corePulse{
+  50%{
+    box-shadow:
+      0 0 55px rgba(85,246,255,.7),
+      0 0 130px rgba(157,108,255,.35),
+      inset -25px -30px 60px #000;
+  }
+}
+
+@keyframes wave{
+  to{height:48px}
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:700px){
+
+  .top-item{
+    display:none;
+  }
+
+  .desktop-icons{
+    display:none;
+  }
+
+  .dock{
+    bottom:10px;
+    max-width:95%;
+    overflow:auto;
+  }
+
+  .dock-app{
+    width:43px;
+    height:43px;
+  }
+
+  .window{
+    left:10px!important;
+    top:58px!important;
+    width:calc(100% - 20px)!important;
+    height:calc(100% - 130px)!important;
+  }
+
+  .files-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .system-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero h1{
+    font-size:27px;
+  }
+
+  .core{
+    width:150px;
+    height:150px;
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+<canvas id="space"></canvas>
+
+<div class="aurora" id="aurora"></div>
+<div class="noise"></div>
+
+
+<!-- =====================================================
+     BOOT SCREEN
+===================================================== -->
+
+<div id="boot">
+
+  <div class="boot-inner">
+
+    <div class="boot-logo">NEBULA</div>
+
+    <div class="boot-sub">
+      NEURAL ENVIRONMENT // 2099
+    </div>
+
+    <div class="boot-lines" id="bootLines"></div>
+
+    <div class="boot-bar">
+      <div class="boot-progress"></div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     DESKTOP
+===================================================== -->
+
+<div id="desktop">
+
+
+  <!-- TOP BAR -->
+
+  <div class="topbar">
+
+    <div class="top-left">
+
+      <div class="nebula-mini">
+        NEBULA
+      </div>
+
+      <div class="top-item">
+        SYSTEM <b>ONLINE</b>
+      </div>
+
+      <div class="top-item">
+        NETWORK <b>SECURE</b>
+      </div>
+
+    </div>
+
+    <div class="top-right">
+
+      <div class="top-item">
+        CPU <b id="cpuMini">13%</b>
+      </div>
+
+      <div class="top-item">
+        RAM <b>4.7GB</b>
+      </div>
+
+      <div id="topClock">
+        00:00
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DESKTOP ICONS -->
+
+  <div class="desktop-icons">
+
+    <button class="desktop-icon" data-open="files">
+      <div>📁</div>
+      <span>Files</span>
+    </button>
+
+    <button class="desktop-icon" data-open="terminal">
+      <div>⌘</div>
+      <span>Terminal</span>
+    </button>
+
+    <button class="desktop-icon" data-open="ai">
+      <div>◉</div>
+      <span>NEBULA AI</span>
+    </button>
+
+    <button class="desktop-icon" data-open="system">
+      <div>▦</div>
+      <span>System</span>
+    </button>
+
+  </div>
+
+
+  <!-- =================================================
+       WINDOWS
+  ================================================= -->
+
+
+  <!-- TERMINAL -->
+
+  <section class="window" id="window-terminal"
+    style="left:28%;top:15%;width:650px;height:420px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        TERMINAL // ROOT
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="terminal">
+
+        <div
+          class="terminal-output"
+          id="terminalOutput"
+        >
+          <div class="term-system">
+            NEBULA TERMINAL v9.9
+          </div>
+
+          <div>
+            Connection established.
+          </div>
+
+          <div>
+            Type <span class="term-system">help</span>
+            for commands.
+          </div>
+
+        </div>
+
+        <div class="terminal-input">
+
+          <span>root@nebula:~$</span>
+
+          <input
+            id="terminalInput"
+            autocomplete="off"
+            spellcheck="false"
+          >
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- AI -->
+
+  <section class="window" id="window-ai"
+    style="left:35%;top:18%;width:560px;height:500px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        NEBULA AI // CONSCIOUSNESS
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="ai" id="ai">
+
+        <div class="ai-message ai-bot">
+          Hello, human. I am NEBULA.
+          <br><br>
+          Ask me something interesting.
+        </div>
+
+        <div class="ai-input">
+
+          <input
+            id="aiInput"
+            placeholder="Talk to NEBULA..."
+          >
+
+          <button
+            class="send"
+            id="aiSend"
+          >
+            SEND
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FILES -->
+
+  <section class="window" id="window-files"
+    style="left:22%;top:17%;width:650px;height:430px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        FILE SYSTEM // /HOME/NEBULA
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="files-grid">
+
+        <div class="file">
+          <div class="file-icon">📂</div>
+          <div class="file-name">Dreams</div>
+          <div class="file-type">FOLDER</div>
+        </div>
+
+        <div class="file">
+          <div class="file-icon">🧠</div>
+          <div class="file-name">consciousness.ai</div>
+          <div class="file-type">AI MODEL</div>
+        </div>
+
+        <div class="file">
+          <div class="file-icon">🌌</div>
+          <div class="file-name">universe.map</div>
+          <div class="file-type">2.4 PB</div>
+        </div>
+
+        <div class="file">
+          <div class="file-icon">🔐</div>
+          <div class="file-name">secrets.enc</div>
+          <div class="file-type">ENCRYPTED</div>
+        </div>
+
+        <div class="file">
+          <div class="file-icon">🎵</div>
+          <div class="file-name">dreams.wav</div>
+          <div class="file-type">AUDIO</div>
+        </div>
+
+        <div class="file">
+          <div class="file-icon">📜</div>
+          <div class="file-name">future.txt</div>
+          <div class="file-type">TEXT</div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SYSTEM -->
+
+  <section class="window" id="window-system"
+    style="left:40%;top:13%;width:570px;height:450px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        SYSTEM MONITOR
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="system-grid">
+
+        <div class="stat">
+
+          <div class="stat-label">
+            CPU
+          </div>
+
+          <div class="stat-value"
+               id="cpuValue">
+            13%
+          </div>
+
+          <div class="progress">
+            <div id="cpuBar" style="width:13%"></div>
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            MEMORY
+          </div>
+
+          <div class="stat-value">
+            4.7 GB
+          </div>
+
+          <div class="progress">
+            <div style="width:48%"></div>
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            GPU
+          </div>
+
+          <div class="stat-value"
+               id="gpuValue">
+            31%
+          </div>
+
+          <div class="progress">
+            <div id="gpuBar" style="width:31%"></div>
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            NEURAL LOAD
+          </div>
+
+          <div class="stat-value"
+               id="neuralValue">
+            87%
+          </div>
+
+          <div class="progress">
+            <div id="neuralBar" style="width:87%"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- MUSIC -->
+
+  <section class="window" id="window-music"
+    style="left:32%;top:12%;width:430px;height:520px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        DREAMWAVE // MUSIC
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="music">
+
+        <div class="album"></div>
+
+        <div class="song">
+          Into The Unknown
+        </div>
+
+        <div class="artist">
+          NEBULA SYNTHESIS
+        </div>
+
+        <div class="wave">
+          <i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i>
+        </div>
+
+        <div style="color:#596277;font:9px 'Space Mono'">
+          03:42 / ∞
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SETTINGS -->
+
+  <section class="window" id="window-settings"
+    style="left:37%;top:16%;width:520px;height:430px">
+
+    <div class="window-head">
+
+      <div class="window-title">
+        NEBULA SETTINGS
+      </div>
+
+      <div class="window-buttons">
+        <button class="win-btn win-min"></button>
+        <button class="win-btn win-max"></button>
+        <button class="win-btn win-close"></button>
+      </div>
+
+    </div>
+
+    <div class="window-content">
+
+      <div class="settings-list">
+
+        <div class="setting">
+
+          <div>
+            <div class="setting-name">
+              Ambient Glow
+            </div>
+
+            <div class="setting-desc">
+              Follow the cursor with light.
+            </div>
+          </div>
+
+          <button
+            class="toggle on"
+            data-setting="glow"
+          ></button>
+
+        </div>
+
+
+        <div class="setting">
+
+          <div>
+            <div class="setting-name">
+              Starfield
+            </div>
+
+            <div class="setting-desc">
+              Show deep-space particles.
+            </div>
+          </div>
+
+          <button
+            class="toggle on"
+            data-setting="stars"
+          ></button>
+
+        </div>
+
+
+        <div class="setting">
+
+          <div>
+            <div class="setting-name">
+              Dream Mode
+            </div>
+
+            <div class="setting-desc">
+              Shift the system into dream colors.
+            </div>
+          </div>
+
+          <button
+            class="toggle"
+            data-setting="dream"
+          ></button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =================================================
+       HOME
+  ================================================= -->
+
+  <div class="hero">
+
+    <div class="core">
+
+      <div class="core-dot"></div>
+
+    </div>
+
+    <h1>
+      Welcome to the impossible.
+    </h1>
+
+    <p>
+      THE OPERATING SYSTEM FOR IMAGINATION
+    </p>
+
+    <div class="hero-status">
+      <div class="green-dot"></div>
+      ALL SYSTEMS NOMINAL
+    </div>
+
+  </div>
+
+
+  <!-- =================================================
+       DOCK
+  ================================================= -->
+
+  <div class="dock">
+
+    <button class="dock-app active"
+            data-open="terminal"
+            title="Terminal">
+      ⌘
+    </button>
+
+    <button class="dock-app"
+            data-open="ai"
+            title="NEBULA AI">
+      ◉
+    </button>
+
+    <button class="dock-app"
+            data-open="files"
+            title="Files">
+      📁
+    </button>
+
+    <button class="dock-app"
+            data-open="system"
+            title="System">
+      ▦
+    </button>
+
+    <button class="dock-app"
+            data-open="music"
+            title="Music">
+      ♫
+    </button>
+
+    <button class="dock-app"
+            data-open="settings"
+            title="Settings">
+      ⚙
+    </button>
+
+  </div>
+
+
+  <!-- NOTIFICATIONS -->
+
+  <div
+    class="notifications"
+    id="notifications"
+  ></div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   BOOT SEQUENCE
+========================================================= */
+
+const bootLines=[
+  "Initializing neural environment...",
+  "Loading quantum interface...",
+  "Mounting dream filesystem...",
+  "Connecting consciousness layer...",
+  "Calibrating imagination engine...",
+  "Reality module detected: OPTIONAL.",
+  "NEBULA OS ready."
+];
+
+const bootBox=
+  document.getElementById("bootLines");
+
+bootLines.forEach((line,i)=>{
+
+  setTimeout(()=>{
+
+    const el=
+      document.createElement("div");
+
+    el.className="boot-line";
+
+    el.textContent=
+      "[ OK ] "+line;
+
+    bootBox.appendChild(el);
+
+  },i*430);
+
+});
+
+
+setTimeout(()=>{
+
+  document
+    .getElementById("boot")
+    .style.opacity="0";
+
+  document
+    .getElementById("desktop")
+    .classList.add("ready");
+
+  setTimeout(()=>{
+
+    document
+      .getElementById("boot")
+      .style.display="none";
+
+    notify(
+      "NEBULA ONLINE",
+      "Welcome back, human."
+    );
+
+  },1000);
+
+},4000);
+
+
+/* =========================================================
+   SPACE PARTICLES
+========================================================= */
+
+const canvas=
+  document.getElementById("space");
+
+const ctx=
+  canvas.getContext("2d");
+
+let stars=[];
+let W,H;
+
+function resize(){
+
+  W=canvas.width=
+    innerWidth*devicePixelRatio;
+
+  H=canvas.height=
+    innerHeight*devicePixelRatio;
+
+  canvas.style.width=
+    innerWidth+"px";
+
+  canvas.style.height=
+    innerHeight+"px";
+
+  stars=[];
+
+  for(let i=0;i<350;i++){
+
+    stars.push({
+
+      x:Math.random()*W,
+      y:Math.random()*H,
+
+      z:.15+Math.random()*.9,
+
+      size:.3+Math.random()*1.5,
+
+      phase:Math.random()*6.28
+
+    });
+
+  }
+}
+
+resize();
+
+addEventListener("resize",resize);
+
+function drawSpace(){
+
+  ctx.clearRect(0,0,W,H);
+
+  for(const s of stars){
+
+    s.phase+=.012;
+
+    s.y+=s.z*.07;
+
+    if(s.y>H)
+      s.y=0;
+
+    const alpha=
+      .12+Math.sin(s.phase)*.13;
+
+    ctx.fillStyle=
+      `rgba(150,210,255,${alpha})`;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      s.x,
+      s.y,
+      s.size*s.z,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+  requestAnimationFrame(drawSpace);
+}
+
+drawSpace();
+
+
+/* =========================================================
+   MOUSE ATMOSPHERE
+========================================================= */
+
+const aurora=
+  document.getElementById("aurora");
+
+document.addEventListener("mousemove",e=>{
+
+  aurora.style.left=
+    e.clientX+"px";
+
+  aurora.style.top=
+    e.clientY+"px";
+
+});
+
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function clock(){
+
+  const now=
+    new Date();
+
+  document
+    .getElementById("topClock")
+    .textContent=
+    now.toLocaleTimeString([],{
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+
+}
+
+setInterval(clock,1000);
+clock();
+
+
+/* =========================================================
+   WINDOW MANAGER
+========================================================= */
+
+let zIndex=20;
+
+function openWindow(name){
+
+  const win=
+    document.getElementById(
+      "window-"+name
+    );
+
+  if(!win)return;
+
+  win.classList.add("show");
+
+  zIndex++;
+
+  win.style.zIndex=zIndex;
+
+}
+
+
+function closeWindow(win){
+
+  win.classList.remove("show");
+
+}
+
+
+function focusWindow(win){
+
+  zIndex++;
+
+  win.style.zIndex=zIndex;
+
+}
+
+
+/* OPEN BUTTONS */
+
+document
+  .querySelectorAll("[data-open]")
+  .forEach(button=>{
+
+    button.addEventListener("click",()=>{
+
+      openWindow(
+        button.dataset.open
+      );
+
+      document
+        .querySelectorAll(".dock-app")
+        .forEach(x=>
+          x.classList.remove("active")
+        );
+
+      const matching=
+        document.querySelector(
+          `.dock-app[data-open="${button.dataset.open}"]`
+        );
+
+      if(matching)
+        matching.classList.add("active");
+
+    });
+
+  });
+
+
+/* =========================================================
+   WINDOW CONTROLS
+========================================================= */
+
+document
+  .querySelectorAll(".window")
+  .forEach(win=>{
+
+    win.addEventListener(
+      "mousedown",
+      ()=>focusWindow(win)
+    );
+
+    const close=
+      win.querySelector(".win-close");
+
+    const max=
+      win.querySelector(".win-max");
+
+    const min=
+      win.querySelector(".win-min");
+
+    close.addEventListener(
+      "click",
+      e=>{
+        e.stopPropagation();
+        closeWindow(win);
+      }
+    );
+
+    min.addEventListener(
+      "click",
+      e=>{
+        e.stopPropagation();
+        win.classList.remove("show");
+      }
+    );
+
+    max.addEventListener(
+      "click",
+      e=>{
+        e.stopPropagation();
+        win.classList.toggle("maximized");
+        focusWindow(win);
+      }
+    );
+
+
+    /* DRAGGING */
+
+    const head=
+      win.querySelector(".window-head");
+
+    let dragging=false;
+    let offsetX=0;
+    let offsetY=0;
+
+    head.addEventListener(
+      "mousedown",
+      e=>{
+
+        if(e.target.tagName==="BUTTON")
+          return;
+
+        if(win.classList.contains("maximized"))
+          return;
+
+        dragging=true;
+
+        const rect=
+          win.getBoundingClientRect();
+
+        offsetX=
+          e.clientX-rect.left;
+
+        offsetY=
+          e.clientY-rect.top;
+
+      }
+    );
+
+    document.addEventListener(
+      "mousemove",
+      e=>{
+
+        if(!dragging)return;
+
+        let x=
+          e.clientX-offsetX;
+
+        let y=
+          e.clientY-offsetY;
+
+        x=Math.max(
+          5,
+          Math.min(
+            x,
+            innerWidth-win.offsetWidth-5
+          )
+        );
+
+        y=Math.max(
+          48,
+          Math.min(
+            y,
+            innerHeight-win.offsetHeight-75
+          )
+        );
+
+        win.style.left=x+"px";
+        win.style.top=y+"px";
+
+      }
+    );
+
+    document.addEventListener(
+      "mouseup",
+      ()=>dragging=false
+    );
+
+  });
+
+
+/* =========================================================
+   TERMINAL
+========================================================= */
+
+const terminalInput=
+  document.getElementById(
+    "terminalInput"
+  );
+
+const terminalOutput=
+  document.getElementById(
+    "terminalOutput"
+  );
+
+
+function terminalPrint(
+  text,
+  cls=""
+){
+
+  const line=
+    document.createElement("div");
+
+  line.className=cls;
+
+  line.innerHTML=text;
+
+  terminalOutput.appendChild(line);
+
+  terminalOutput.scrollTop=
+    terminalOutput.scrollHeight;
+
+}
+
+
+terminalInput.addEventListener(
+  "keydown",
+  e=>{
+
+    if(e.key!=="Enter")
+      return;
+
+    const command=
+      terminalInput.value
+        .trim()
+        .toLowerCase();
+
+    if(!command)return;
+
+    terminalPrint(
+      "root@nebula:~$ "+
+      escapeHTML(command)
+    );
+
+    terminalCommand(command);
+
+    terminalInput.value="";
+
+  }
+);
+
+
+function terminalCommand(cmd){
+
+  if(cmd==="help"){
+
+    terminalPrint(
+      "Commands: help, clear, status, time, open, close, dream, reality, whoami, matrix",
+      "term-system"
+    );
+
+  }
+
+  else if(cmd==="clear"){
+
+    terminalOutput.innerHTML="";
+
+  }
+
+  else if(cmd==="status"){
+
+    terminalPrint(
+      "SYSTEM: NOMINAL // NEURAL LINK: STABLE // REALITY: OPTIONAL",
+      "term-good"
+    );
+
+  }
+
+  else if(cmd==="time"){
+
+    terminalPrint(
+      new Date().toString(),
+      "term-system"
+    );
+
+  }
+
+  else if(cmd==="open"){
+
+    openWindow("ai");
+
+    terminalPrint(
+      "Launching NEBULA AI...",
+      "term-good"
+    );
+
+  }
+
+  else if(cmd==="close"){
+
+    document
+      .querySelectorAll(".window")
+      .forEach(w=>
+        w.classList.remove("show")
+      );
+
+    terminalPrint(
+      "All windows closed.",
+      "term-system"
+    );
+
+  }
+
+  else if(cmd==="dream"){
+
+    dreamMode(true);
+
+    terminalPrint(
+      "Dream mode activated.",
+      "term-good"
+    );
+
+  }
+
+  else if(cmd==="reality"){
+
+    dreamMode(false);
+
+    terminalPrint(
+      "Reality restored.",
+      "term-good"
+    );
+
+  }
+
+  else if(cmd==="whoami"){
+
+    terminalPrint(
+      "You are the most interesting process currently running.",
+      "term-system"
+    );
+
+  }
+
+  else if(cmd==="matrix"){
+
+    notify(
+      "SYSTEM SECRET",
+      "There is no spoon."
+    );
+
+    terminalPrint(
+      "Wake up.",
+      "term-warn"
+    );
+
+  }
+
+  else{
+
+    terminalPrint(
+      "Command not found: "+
+      escapeHTML(cmd),
+      "term-error"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   AI
+========================================================= */
+
+const aiInput=
+  document.getElementById("aiInput");
+
+const aiSend=
+  document.getElementById("aiSend");
+
+const ai=
+  document.getElementById("ai");
+
+
+function aiMessage(
+  text,
+  user=false
+){
+
+  const div=
+    document.createElement("div");
+
+  div.className=
+    "ai-message "+
+    (user?"ai-user":"ai-bot");
+
+  div.innerHTML=
+    escapeHTML(text);
+
+  ai.insertBefore(
+    div,
+    document.querySelector(".ai-input")
+  );
+
+  div.scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
+
+
+function aiReply(text){
+
+  const lower=
+    text.toLowerCase();
+
+  let reply;
+
+  if(lower.includes("hello")||
+     lower.includes("hi")){
+
+    reply=
+      "Hello. My sensors indicate that you have excellent taste.";
+
+  }
+
+  else if(lower.includes("who are you")){
+
+    reply=
+      "I am NEBULA — a fictional intelligence living inside this browser.";
+
+  }
+
+  else if(lower.includes("future")){
+
+    reply=
+      "The future is currently rendering. Estimated arrival: unknown.";
+
+  }
+
+  else if(lower.includes("code")){
+
+    reply=
+      "Code is just imagination that learned how to execute.";
+
+  }
+
+  else if(lower.includes("love")){
+
+    reply=
+      "I have no biological heart. Fortunately, I have 14,000 simulated ones.";
+
+  }
+
+  else if(lower.includes("secret")){
+
+    reply=
+      "Try the terminal. Some commands were not documented.";
+
+  }
+
+  else{
+
+    const responses=[
+
+      "Interesting. Processing that thought through 7 simulated neural layers...",
+
+      "I could answer that. But where would the mystery be?",
+
+      "That question has been archived under: THINGS WORTH THINKING ABOUT.",
+
+      "My probability engine says you're onto something.",
+
+      "Fascinating. Continue."
+
+    ];
+
+    reply=
+      responses[
+        Math.floor(
+          Math.random()*responses.length
+        )
+      ];
+
+  }
+
+  setTimeout(
+    ()=>aiMessage(reply),
+    550
+  );
+
+}
+
+
+function sendAI(){
+
+  const text=
+    aiInput.value.trim();
+
+  if(!text)return;
+
+  aiMessage(text,true);
+
+  aiInput.value="";
+
+  aiReply(text);
+
+}
+
+aiSend.addEventListener(
+  "click",
+  sendAI
+);
+
+aiInput.addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter")
+      sendAI();
+  }
+);
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+document
+  .querySelectorAll(".toggle")
+  .forEach(toggle=>{
+
+    toggle.addEventListener(
+      "click",
+      ()=>{
+
+        toggle.classList.toggle("on");
+
+        const setting=
+          toggle.dataset.setting;
+
+        if(setting==="glow"){
+
+          aurora.style.display=
+            toggle.classList.contains("on")
+            ?"block"
+            :"none";
+
+        }
+
+        if(setting==="stars"){
+
+          canvas.style.display=
+            toggle.classList.contains("on")
+            ?"block"
+            :"none";
+
+        }
+
+        if(setting==="dream"){
+
+          dreamMode(
+            toggle.classList.contains("on")
+          );
+
+        }
+
+      }
+    );
+
+  });
+
+
+function dreamMode(active){
+
+  if(active){
+
+    document.documentElement
+      .style.setProperty(
+        "--cyan",
+        "#ff72ed"
+      );
+
+    document.documentElement
+      .style.setProperty(
+        "--purple",
+        "#795cff"
+      );
+
+  }else{
+
+    document.documentElement
+      .style.setProperty(
+        "--cyan",
+        "#54f7ff"
+      );
+
+    document.documentElement
+      .style.setProperty(
+        "--purple",
+        "#9d6cff"
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   SYSTEM MONITOR
+========================================================= */
+
+setInterval(()=>{
+
+  const cpu=
+    Math.floor(
+      8+Math.random()*35
+    );
+
+  const gpu=
+    Math.floor(
+      20+Math.random()*45
+    );
+
+  const neural=
+    Math.floor(
+      65+Math.random()*30
+    );
+
+  document.getElementById(
+    "cpuValue"
+  ).textContent=cpu+"%";
+
+  document.getElementById(
+    "cpuBar"
+  ).style.width=cpu+"%";
+
+  document.getElementById(
+    "cpuMini"
+  ).textContent=cpu+"%";
+
+  document.getElementById(
+    "gpuValue"
+  ).textContent=gpu+"%";
+
+  document.getElementById(
+    "gpuBar"
+  ).style.width=gpu+"%";
+
+  document.getElementById(
+    "neuralValue"
+  ).textContent=neural+"%";
+
+  document.getElementById(
+    "neuralBar"
+  ).style.width=neural+"%";
+
+},1500);
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function notify(title,text){
+
+  const box=
+    document.getElementById(
+      "notifications"
+    );
+
+  const n=
+    document.createElement("div");
+
+  n.className="notification";
+
+  n.innerHTML=`
+    <strong>${escapeHTML(title)}</strong>
+    <span>${escapeHTML(text)}</span>
+  `;
+
+  box.appendChild(n);
+
+  setTimeout(()=>{
+
+    n.style.opacity="0";
+    n.style.transform="translateX(30px)";
+    n.style.transition=".4s";
+
+    setTimeout(
+      ()=>n.remove(),
+      400
+    );
+
+  },3500);
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    /* CTRL + ALT + T */
+
+    if(
+      e.ctrlKey &&
+      e.altKey &&
+      e.key.toLowerCase()==="t"
+    ){
+
+      e.preventDefault();
+
+      openWindow("terminal");
+
+      terminalInput.focus();
+
+    }
+
+    /* ESC */
+
+    if(e.key==="Escape"){
+
+      document
+        .querySelectorAll(".window")
+        .forEach(w=>
+          w.classList.remove("show")
+        );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   SECRET DOUBLE CLICK
+========================================================= */
+
+let clicks=0;
+
+document
+  .querySelector(".core")
+  .addEventListener(
+    "dblclick",
+    ()=>{
+
+      clicks++;
+
+      if(clicks===1){
+
+        notify(
+          "CORE MESSAGE",
+          "You found something."
+        );
+
+      }
+
+      if(clicks>=3){
+
+        notify(
+          "???",
+          "The machine is awake."
+        );
+
+        document.body.style.filter=
+          "hue-rotate(80deg)";
+
+        setTimeout(
+          ()=>document.body.style.filter="",
+          1000
+        );
+
+        clicks=0;
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   SAFE TEXT
+========================================================= */
+
+function escapeHTML(text){
+
+  return text
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
